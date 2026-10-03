@@ -27,17 +27,31 @@ async function init() {
   await sdk.commands.authenticate({ access_token: auth.access_token });
   session = auth.session;
 
-  if (!sdk.guildId || !sdk.channelId) throw new Error('Abra a Atividade numa call de um servidor.');
-  return sdk;
+  if (!sdk.channelId) throw new Error('Abra a Atividade dentro de uma call.');
+  return { sdk, me: auth.user };
+}
+
+// Quem está na call. Em servidor, o Discord lista o canal de voz inteiro. Em call por mensagem direta
+// isso exige permissão especial, então usamos quem abriu a Atividade (o host também precisa abrir).
+async function callUserIds(sdk) {
+  if (sdk.guildId) {
+    try {
+      const channel = await sdk.commands.getChannel({ channel_id: sdk.channelId });
+      return (channel.voice_states || []).map((v) => v.user.id);
+    } catch {
+      // cai para os participantes da Atividade
+    }
+  }
+  const { participants } = await sdk.commands.getInstanceConnectedParticipants();
+  return participants.map((p) => p.id);
 }
 
 async function findRooms(sdk) {
-  const channel = await sdk.commands.getChannel({ channel_id: sdk.channelId });
-  const voiceUserIds = (channel.voice_states || []).map((v) => v.user.id);
+  const voiceUserIds = await callUserIds(sdk);
   const res = await fetch('/api/activity/rooms', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session}` },
-    body: JSON.stringify({ guildId: sdk.guildId, voiceUserIds }),
+    body: JSON.stringify({ guildId: sdk.guildId || null, voiceUserIds }),
   });
   const body = await res.json();
   if (!res.ok) throw new Error(body.error);
@@ -55,7 +69,7 @@ function watch(room) {
 }
 
 // Procura transmissões de quem está na call; com uma só, entra direto.
-async function lobby(sdk) {
+async function lobby({ sdk, me }) {
   show('stage', false);
   $('title').textContent = 'Transmissões nesta call';
   let current = null;
@@ -73,10 +87,12 @@ async function lobby(sdk) {
 
   async function refresh() {
     if (current) return;
-    const rooms = await findRooms(sdk).catch((e) => {
+    const all = await findRooms(sdk).catch((e) => {
       $('error').textContent = e.message;
       return [];
     });
+    const mine = all.some((r) => r.host.id === me.id);
+    const rooms = all.filter((r) => r.host.id !== me.id);
     if (rooms.length === 1) return open(rooms[0]);
     $('rooms').replaceChildren(
       ...rooms.map((room) => {
@@ -90,11 +106,14 @@ async function lobby(sdk) {
         return li;
       }),
     );
-    setStatus(
-      rooms.length
-        ? 'Escolha qual tela assistir.'
-        : `Ninguém desta call está transmitindo agora. Para transmitir, abra ${config.publicUrl} no navegador.`,
-    );
+    if (rooms.length) setStatus('Escolha qual tela assistir.');
+    else if (mine) setStatus('Você está transmitindo. Seus amigos na call já conseguem assistir por aqui.');
+    else {
+      setStatus(
+        `Ninguém desta call está transmitindo agora. Para transmitir, abra ${config.publicUrl} no navegador` +
+          (sdk.guildId ? '.' : ' e deixe esta Atividade aberta também.'),
+      );
+    }
   }
 
   $('back').onclick = () => {

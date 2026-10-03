@@ -1,7 +1,10 @@
 const $ = (id) => document.getElementById(id);
 
-// Aberto pelo Discord como Atividade (vem com frame_id): vai para a tela de quem assiste dentro da call.
-if (new URLSearchParams(location.search).has('frame_id')) location.replace(`/activity.html${location.search}`);
+// Aberto pelo Discord como Atividade: vai para a tela de quem assiste dentro da call.
+const params = new URLSearchParams(location.search);
+if (location.hostname.endsWith('.discordsays.com') || params.has('frame_id') || params.has('instance_id')) {
+  location.replace(`/activity.html${location.search}`);
+}
 
 const { devMode } = await fetch('/api/config').then((r) => r.json());
 $('dev-banner').classList.toggle('hidden', !devMode);

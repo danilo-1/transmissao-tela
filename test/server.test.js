@@ -135,3 +135,30 @@ test('Atividade: acha a sala de quem está na mesma call e conecta com token', a
   viewer.close();
   host.ws.close();
 });
+
+test('Atividade em call por mensagem direta: sem servidor, libera quem está com o host', async () => {
+  const hostCookie = await login('Host DM');
+  const room = await fetch(`${base}/api/rooms`, {
+    method: 'POST',
+    headers: { cookie: hostCookie, 'content-type': 'application/json' },
+    body: JSON.stringify({ guildId: 'dev' }),
+  }).then((r) => r.json());
+  const host = openWs(room.id, hostCookie);
+  await host.next('hello');
+  const hostId = (await fetch(`${base}/api/me`, { headers: { cookie: hostCookie } }).then((r) => r.json())).user.id;
+
+  // Amigo que não está no servidor escolhido pelo host.
+  const token = createSessionToken({ id: 'amigo-dm', name: 'Amigo DM', avatar: '', guilds: [] });
+  const found = await fetch(`${base}/api/activity/rooms`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ guildId: null, voiceUserIds: ['amigo-dm', hostId] }),
+  }).then((r) => r.json());
+  assert.ok(found.rooms.some((r) => r.id === room.id));
+
+  const viewer = new WebSocket(`${base.replace('http', 'ws')}/ws?room=${room.id}&token=${token}`);
+  const joined = await host.next('viewer-joined');
+  assert.equal(joined.user.name, 'Amigo DM');
+  viewer.close();
+  host.ws.close();
+});
