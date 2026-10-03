@@ -81,7 +81,10 @@ authRouter.get('/callback', async (req, res) => {
 // Modo de desenvolvimento: entra só com um nome, todos "no mesmo servidor".
 authRouter.post('/dev-login', express.urlencoded({ extended: false }), (req, res) => {
   if (!config.devMode) return res.status(404).end();
-  const name = String(req.body.name || '').trim().slice(0, 32) || 'Anônimo';
+  const name =
+    String(req.body.name || '')
+      .trim()
+      .slice(0, 32) || 'Anônimo';
   const id = crypto.randomBytes(8).toString('hex');
   createSession(res, {
     id,

@@ -20,6 +20,7 @@ export function createApp() {
     next();
   });
 
+  app.get('/healthz', (req, res) => res.json({ ok: true }));
   app.use('/auth', authRouter);
   app.use(express.static(publicDir, { extensions: ['html'] }));
   app.use(express.json());

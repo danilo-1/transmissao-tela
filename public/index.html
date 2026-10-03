@@ -1,34 +1,36 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Transmissão de tela</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-<main>
-  <header class="top">
-    <h1>Transmissão de tela</h1>
-    <div id="me" class="user hidden"></div>
-  </header>
-  <p class="muted">Compartilhe sua tela com os amigos da sua call do Discord. Eles entram pelo link com a conta do Discord.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transmissão de tela</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <h1>Transmissão de tela</h1>
+        <div id="me" class="user hidden"></div>
+      </header>
+      <p class="muted">
+        Compartilhe sua tela com os amigos da sua call do Discord. Eles entram pelo link com a conta do Discord.
+      </p>
 
-  <section id="logged-out" class="panel hidden">
-    <a class="button" href="/auth/login">Entrar com Discord</a>
-  </section>
+      <section id="logged-out" class="panel hidden">
+        <a class="button" href="/auth/login">Entrar com Discord</a>
+      </section>
 
-  <section id="logged-in" class="panel hidden">
-    <h2>Nova transmissão</h2>
-    <p class="muted">Escolha o servidor da sua call. Só quem está nesse servidor consegue assistir.</p>
-    <div class="row">
-      <select id="guild"></select>
-      <button id="create">Criar sala</button>
-    </div>
-    <p id="error" class="error"></p>
-    <form method="post" action="/auth/logout"><button class="secondary" type="submit">Sair</button></form>
-  </section>
-</main>
-<script type="module" src="/index.js"></script>
-</body>
+      <section id="logged-in" class="panel hidden">
+        <h2>Nova transmissão</h2>
+        <p class="muted">Escolha o servidor da sua call. Só quem está nesse servidor consegue assistir.</p>
+        <div class="row">
+          <select id="guild"></select>
+          <button id="create">Criar sala</button>
+        </div>
+        <p id="error" class="error"></p>
+        <form method="post" action="/auth/logout"><button class="secondary" type="submit">Sair</button></form>
+      </section>
+    </main>
+    <script type="module" src="/index.js"></script>
+  </body>
 </html>

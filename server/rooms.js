@@ -8,9 +8,12 @@ export function createRoom(host, guild) {
   const room = { id, host, guild, hostSocket: null, viewers: new Map(), createdAt: Date.now() };
   rooms.set(id, room);
   // Sala criada e nunca aberta pelo host expira em 10 minutos.
-  setTimeout(() => {
-    if (rooms.get(id) === room && !room.hostSocket) rooms.delete(id);
-  }, 10 * 60 * 1000).unref();
+  setTimeout(
+    () => {
+      if (rooms.get(id) === room && !room.hostSocket) rooms.delete(id);
+    },
+    10 * 60 * 1000,
+  ).unref();
   return room;
 }
 

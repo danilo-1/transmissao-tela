@@ -1,21 +1,26 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrar (teste)</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-<main>
-  <h1>Entrar (modo de teste)</h1>
-  <p class="muted">O app está sem as chaves do Discord, então o login pede só um nome. Configure o <code>.env</code> para usar o Discord de verdade.</p>
-  <form class="panel row" method="post" action="/auth/dev-login">
-    <input type="text" name="name" placeholder="Seu nome" required maxlength="32" autofocus>
-    <input type="hidden" name="next" id="next">
-    <button type="submit">Entrar</button>
-  </form>
-</main>
-<script>document.getElementById('next').value = new URLSearchParams(location.search).get('next') || '/';</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrar (teste)</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Entrar (modo de teste)</h1>
+      <p class="muted">
+        O app está sem as chaves do Discord, então o login pede só um nome. Configure o <code>.env</code> para usar o
+        Discord de verdade.
+      </p>
+      <form class="panel row" method="post" action="/auth/dev-login">
+        <input type="text" name="name" placeholder="Seu nome" required maxlength="32" autofocus />
+        <input type="hidden" name="next" id="next" />
+        <button type="submit">Entrar</button>
+      </form>
+    </main>
+    <script>
+      document.getElementById('next').value = new URLSearchParams(location.search).get('next') || '/';
+    </script>
+  </body>
 </html>

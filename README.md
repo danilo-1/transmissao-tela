@@ -17,7 +17,7 @@ Sem `DISCORD_CLIENT_ID` no `.env`, o app roda em **modo de teste**: o login pede
 ## Ligando o login do Discord
 
 1. Crie um app em https://discord.com/developers/applications.
-2. Em **OAuth2**, copie o *Client ID* e gere o *Client Secret*.
+2. Em **OAuth2**, copie o _Client ID_ e gere o _Client Secret_.
 3. Em **OAuth2 > Redirects**, adicione `http://localhost:3000/auth/callback` (e depois a URL de produção + `/auth/callback`).
 4. Preencha `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` e `SESSION_SECRET` no `.env` e reinicie.
 
@@ -35,5 +35,21 @@ Limites atuais: funciona bem para 3 a 5 espectadores (cada um consome upload do 
 ## Testes
 
 ```bash
-npm test
+npm run check      # lint + formatação + testes do servidor
+npm run test:e2e   # transmissão real entre dois Chromium (precisa do Playwright)
 ```
+
+## CI/CD
+
+- **CI** (GitHub Actions): lint, formatação, testes, auditoria de dependências, teste ponta a ponta e build Docker em todo PR e push na `main`.
+- **CD**: quando o CI passa na `main`, o workflow `Deploy` chama o deploy hook do Render.
+- **Segurança**: CodeQL semanal e Dependabot.
+
+### Primeiro deploy no Render
+
+1. Em https://render.com, **New > Blueprint** e escolha este repositório (ele lê o `render.yaml`).
+2. Preencha `BASE_URL` (a URL que o Render der, ex. `https://transmissao-tela.onrender.com`) e as chaves do Discord.
+3. No Discord Developer Portal, adicione `<BASE_URL>/auth/callback` nos Redirects.
+4. No Render, copie o **Deploy Hook** do serviço e salve no GitHub como secret `RENDER_DEPLOY_HOOK_URL` no environment `production`.
+
+Detalhes do fluxo de trabalho em [CONTRIBUTING.md](CONTRIBUTING.md).

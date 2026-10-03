@@ -12,9 +12,7 @@ export const config = {
     clientSecret: env.DISCORD_CLIENT_SECRET || '',
   },
   sessionSecret: env.SESSION_SECRET || 'dev-secret-troque-isto',
-  turn: env.TURN_URL
-    ? { urls: env.TURN_URL, username: env.TURN_USERNAME, credential: env.TURN_CREDENTIAL }
-    : null,
+  turn: env.TURN_URL ? { urls: env.TURN_URL, username: env.TURN_USERNAME, credential: env.TURN_CREDENTIAL } : null,
 };
 
 // Sem credenciais do Discord, o app roda em modo de desenvolvimento (login só com nome).

@@ -74,7 +74,9 @@ test('host cria sala e espectador recebe sinal do host', async () => {
   const joined = await host.next('viewer-joined');
   assert.equal(joined.user.name, 'Amigo');
 
-  host.ws.send(JSON.stringify({ type: 'signal', to: joined.peerId, data: { description: { type: 'offer', sdp: 'x' } } }));
+  host.ws.send(
+    JSON.stringify({ type: 'signal', to: joined.peerId, data: { description: { type: 'offer', sdp: 'x' } } }),
+  );
   const signal = await viewer.next('signal');
   assert.equal(signal.data.description.type, 'offer');
 

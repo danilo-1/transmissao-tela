@@ -73,7 +73,10 @@ function hostMode(room, ws, sendWs, iceServers) {
         const who = document.createElement('span');
         who.className = 'user';
         who.append(Object.assign(document.createElement('img'), { src: user.avatar, alt: '' }), user.name);
-        const kick = Object.assign(document.createElement('button'), { textContent: 'Remover', className: 'secondary' });
+        const kick = Object.assign(document.createElement('button'), {
+          textContent: 'Remover',
+          className: 'secondary',
+        });
         kick.onclick = () => sendWs({ type: 'kick', peerId });
         li.append(who, kick);
         return li;

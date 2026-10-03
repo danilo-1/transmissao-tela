@@ -12,10 +12,13 @@ function sign(value) {
 
 export function parseCookies(header = '') {
   return Object.fromEntries(
-    header.split(';').filter(Boolean).map((part) => {
-      const i = part.indexOf('=');
-      return [part.slice(0, i).trim(), decodeURIComponent(part.slice(i + 1).trim())];
-    }),
+    header
+      .split(';')
+      .filter(Boolean)
+      .map((part) => {
+        const i = part.indexOf('=');
+        return [part.slice(0, i).trim(), decodeURIComponent(part.slice(i + 1).trim())];
+      }),
   );
 }
 
