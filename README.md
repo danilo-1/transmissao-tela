@@ -34,8 +34,6 @@ Para ligar, no [Discord Developer Portal](https://discord.com/developers/applica
 3. **Installation**: deixe **Guild Install** ligado e use o _Install Link_ para adicionar o app ao seu servidor.
 4. Numa call do servidor, clique no foguete (Atividades) e escolha o app.
 
-Enquanto o app não for verificado pelo Discord, só servidores com até 25 membros conseguem abrir a Atividade.
-
 ## Como funciona
 
 - `server/auth.js`: login com Discord (OAuth2) e o login de teste.
