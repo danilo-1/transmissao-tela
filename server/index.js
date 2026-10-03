@@ -45,13 +45,15 @@ export function createApp() {
   app.post('/api/activity/rooms', (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'login necessário' });
     const { guildId, voiceUserIds } = req.body || {};
-    if (typeof guildId !== 'string' || !Array.isArray(voiceUserIds)) {
+    if ((guildId !== null && typeof guildId !== 'string') || !Array.isArray(voiceUserIds)) {
       return res.status(400).json({ error: 'dados da call inválidos' });
     }
-    if (!voiceUserIds.includes(req.user.id) || !req.user.guilds.some((g) => g.id === guildId)) {
+    if (!voiceUserIds.includes(req.user.id) || (guildId && !req.user.guilds.some((g) => g.id === guildId))) {
       return res.status(403).json({ error: 'você não está nessa call' });
     }
-    res.json({ rooms: roomsForCall(guildId, voiceUserIds.map(String)).map(publicRoom) });
+    const rooms = roomsForCall(guildId, voiceUserIds.map(String));
+    for (const room of rooms) room.allowed.add(req.user.id);
+    res.json({ rooms: rooms.map(publicRoom) });
   });
 
   app.post('/api/rooms', (req, res) => {

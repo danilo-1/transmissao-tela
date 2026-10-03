@@ -5,7 +5,8 @@ const rooms = new Map();
 
 export function createRoom(host, guild) {
   const id = crypto.randomBytes(9).toString('base64url');
-  const room = { id, host, guild, hostSocket: null, viewers: new Map(), createdAt: Date.now() };
+  // allowed: quem a Atividade confirmou estar na call com o host (pode não estar no servidor escolhido).
+  const room = { id, host, guild, hostSocket: null, viewers: new Map(), allowed: new Set(), createdAt: Date.now() };
   rooms.set(id, room);
   // Sala criada e nunca aberta pelo host expira em 10 minutos.
   setTimeout(
@@ -28,14 +29,17 @@ export function deleteRoom(id) {
 // Nível A do plano: entra o host ou quem está no servidor do Discord escolhido para a sala.
 export function canWatch(room, user) {
   if (!user) return false;
-  if (user.id === room.host.id) return true;
+  if (user.id === room.host.id || room.allowed.has(user.id)) return true;
   return user.guilds.some((g) => g.id === room.guild.id);
 }
 
 // Salas ao vivo cujo host está na mesma call (canal de voz) que o espectador da Atividade.
+// guildId é null em call por mensagem direta.
 export function roomsForCall(guildId, voiceUserIds) {
   const inCall = new Set(voiceUserIds);
-  return [...rooms.values()].filter((r) => r.hostSocket && r.guild.id === guildId && inCall.has(r.host.id));
+  return [...rooms.values()].filter(
+    (r) => r.hostSocket && (!guildId || r.guild.id === guildId) && inCall.has(r.host.id),
+  );
 }
 
 export function publicRoom(room) {
