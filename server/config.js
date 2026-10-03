@@ -9,8 +9,8 @@ export const config = {
   // No Render, RENDER_EXTERNAL_URL já vem preenchida com a URL pública do serviço.
   baseUrl: (env.BASE_URL || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 3000}`).replace(/\/$/, ''),
   discord: {
-    clientId: env.DISCORD_CLIENT_ID || '',
-    clientSecret: env.DISCORD_CLIENT_SECRET || '',
+    clientId: (env.DISCORD_CLIENT_ID || '').trim(),
+    clientSecret: (env.DISCORD_CLIENT_SECRET || '').trim(),
   },
   sessionSecret: env.SESSION_SECRET || 'dev-secret-troque-isto',
   turn: env.TURN_URL ? { urls: env.TURN_URL, username: env.TURN_USERNAME, credential: env.TURN_CREDENTIAL } : null,

@@ -1,5 +1,8 @@
 const $ = (id) => document.getElementById(id);
 
+const { devMode } = await fetch('/api/config').then((r) => r.json());
+$('dev-banner').classList.toggle('hidden', !devMode);
+
 const res = await fetch('/api/me');
 if (res.status === 401) {
   $('logged-out').classList.remove('hidden');
