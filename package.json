@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run lint && npm run format:check && npm test",
-    "test:e2e": "node e2e/stream.e2e.js"
+    "test:e2e": "node e2e/stream.e2e.js",
+    "build:sdk": "esbuild node_modules/@discord/embedded-app-sdk/output/index.mjs --bundle --format=esm --minify --outfile=public/vendor/discord-sdk.js"
   },
   "engines": {
     "node": ">=20"
@@ -24,9 +25,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "globals": "^17.13.0",
     "playwright": "^1.56.1",
-    "prettier": "^3.9.9"
+    "prettier": "^3.9.9",
+    "@discord/embedded-app-sdk": "^2.5.0"
   }
 }

@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { config, iceServers } from './config.js';
 import { authRouter } from './auth.js';
-import { getUser } from './sessions.js';
-import { createRoom, getRoom, canWatch, publicRoom } from './rooms.js';
+import { getUser, getUserByToken } from './sessions.js';
+import { createRoom, getRoom, canWatch, publicRoom, roomsForCall } from './rooms.js';
 import { attachSignaling } from './signaling.js';
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -16,7 +16,9 @@ export function createApp() {
   app.set('trust proxy', 1);
 
   app.use((req, res, next) => {
-    req.user = getUser(req.headers.cookie);
+    // Dentro do Discord (Atividade) a sessão vem no header Authorization em vez de cookie.
+    const bearer = req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
+    req.user = bearer ? getUserByToken(bearer) : getUser(req.headers.cookie);
     next();
   });
 
@@ -30,7 +32,27 @@ export function createApp() {
     res.json({ user: req.user, devMode: config.devMode });
   });
 
-  app.get('/api/config', (req, res) => res.json({ iceServers: iceServers(), devMode: config.devMode }));
+  app.get('/api/config', (req, res) =>
+    res.json({
+      iceServers: iceServers(),
+      devMode: config.devMode,
+      discordClientId: config.discord.clientId,
+      publicUrl: config.baseUrl,
+    }),
+  );
+
+  // A Atividade informa o servidor e quem está na call; devolvemos as transmissões de quem está nela.
+  app.post('/api/activity/rooms', (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'login necessário' });
+    const { guildId, voiceUserIds } = req.body || {};
+    if (typeof guildId !== 'string' || !Array.isArray(voiceUserIds)) {
+      return res.status(400).json({ error: 'dados da call inválidos' });
+    }
+    if (!voiceUserIds.includes(req.user.id) || !req.user.guilds.some((g) => g.id === guildId)) {
+      return res.status(403).json({ error: 'você não está nessa call' });
+    }
+    res.json({ rooms: roomsForCall(guildId, voiceUserIds.map(String)).map(publicRoom) });
+  });
 
   app.post('/api/rooms', (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'login necessário' });

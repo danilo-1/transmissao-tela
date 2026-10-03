@@ -1,14 +1,6 @@
-const $ = (id) => document.getElementById(id);
-const show = (id, on = true) => $(id).classList.toggle('hidden', !on);
-const roomId = location.pathname.split('/').pop();
+import { $, show, setStatus, setLive, connect, viewerMode } from './shared.js';
 
-function setStatus(text) {
-  $('status').textContent = text;
-}
-function setLive(live) {
-  $('badge').textContent = live ? 'ao vivo' : 'offline';
-  $('badge').classList.toggle('live', live);
-}
+const roomId = location.pathname.split('/').pop();
 
 const roomRes = await fetch(`/api/rooms/${roomId}`);
 const room = await roomRes.json();
@@ -30,20 +22,7 @@ async function start(room) {
   show('stage');
   $('fullscreen').onclick = () => $('video').requestFullscreen?.();
 
-  const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws?room=${roomId}`);
-  const sendWs = (msg) => ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify(msg));
-
-  ws.addEventListener('close', (e) => {
-    const reasons = {
-      4401: 'Sua sessão expirou. Recarregue a página.',
-      4403: 'Você não tem permissão para assistir esta sala.',
-      4404: 'Esta sala não existe mais.',
-      4409: 'A sala foi aberta em outra aba.',
-      4410: 'A transmissão foi encerrada.',
-    };
-    setLive(false);
-    setStatus(reasons[e.code] || 'Conexão perdida. Recarregue a página para tentar de novo.');
-  });
+  const { ws, sendWs } = connect(roomId);
 
   if (room.isHost) hostMode(room, ws, sendWs, iceServers);
   else viewerMode(ws, sendWs, iceServers);
@@ -161,60 +140,6 @@ function hostMode(room, ws, sendWs, iceServers) {
       if (!pc) return;
       if (msg.data.description) await pc.setRemoteDescription(msg.data.description);
       else if (msg.data.candidate) await pc.addIceCandidate(msg.data.candidate).catch(() => {});
-    }
-  });
-}
-
-function viewerMode(ws, sendWs, iceServers) {
-  let pc = null;
-  const video = $('video');
-
-  function waiting() {
-    pc?.close();
-    pc = null;
-    video.srcObject = null;
-    setLive(false);
-    show('unmute', false);
-    setStatus('Aguardando o host compartilhar a tela…');
-  }
-
-  $('unmute').onclick = () => {
-    video.muted = false;
-    video.play();
-    show('unmute', false);
-  };
-
-  ws.addEventListener('message', async (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.type === 'hello' || msg.type === 'host-online') {
-      waiting();
-    } else if (msg.type === 'host-offline') {
-      waiting();
-      setStatus('O host saiu da sala. Aguardando ele voltar…');
-    } else if (msg.type === 'signal') {
-      const { description, candidate, stopped } = msg.data;
-      if (stopped) return waiting();
-      if (description) {
-        pc?.close();
-        pc = new RTCPeerConnection({ iceServers });
-        pc.onicecandidate = (ev) => ev.candidate && sendWs({ type: 'signal', data: { candidate: ev.candidate } });
-        pc.ontrack = (ev) => {
-          video.srcObject = ev.streams[0];
-          setLive(true);
-          setStatus('');
-          if (ev.streams[0].getAudioTracks().length) show('unmute', video.muted);
-        };
-        pc.onconnectionstatechange = () => {
-          if (pc?.connectionState === 'failed') {
-            setStatus('Não deu para conectar direto com o host. Pode ser a rede; um servidor TURN resolve.');
-          }
-        };
-        await pc.setRemoteDescription(description);
-        await pc.setLocalDescription(await pc.createAnswer());
-        sendWs({ type: 'signal', data: { description: pc.localDescription } });
-      } else if (candidate && pc) {
-        await pc.addIceCandidate(candidate).catch(() => {});
-      }
     }
   });
 }

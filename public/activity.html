@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transmissão de tela</title>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      main {
+        max-width: none;
+        padding: 12px;
+      }
+      video {
+        max-height: calc(100vh - 120px);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <div>
+          <h1 id="title">Conectando ao Discord…</h1>
+          <span id="badge" class="badge">offline</span>
+        </div>
+      </header>
+      <p id="error" class="error"></p>
+      <ul id="rooms" class="viewers"></ul>
+
+      <section id="stage" class="hidden">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="row" style="margin-top: 8px">
+          <button id="unmute" class="secondary hidden">Ativar som</button>
+          <button id="fullscreen" class="secondary">Tela cheia</button>
+          <button id="back" class="secondary hidden">Trocar transmissão</button>
+        </div>
+      </section>
+      <p id="status" class="muted"></p>
+    </main>
+    <script type="module" src="/activity.js"></script>
+  </body>
+</html>
