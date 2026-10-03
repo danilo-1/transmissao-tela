@@ -7,8 +7,6 @@ services:
     healthCheckPath: /healthz
     autoDeploy: false # o deploy vem do GitHub Actions, depois do CI passar
     envVars:
-      - key: BASE_URL
-        sync: false
       - key: DISCORD_CLIENT_ID
         sync: false
       - key: DISCORD_CLIENT_SECRET

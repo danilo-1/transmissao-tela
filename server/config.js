@@ -6,7 +6,8 @@ const env = process.env;
 
 export const config = {
   port: Number(env.PORT) || 3000,
-  baseUrl: (env.BASE_URL || `http://localhost:${env.PORT || 3000}`).replace(/\/$/, ''),
+  // No Render, RENDER_EXTERNAL_URL já vem preenchida com a URL pública do serviço.
+  baseUrl: (env.BASE_URL || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 3000}`).replace(/\/$/, ''),
   discord: {
     clientId: env.DISCORD_CLIENT_ID || '',
     clientSecret: env.DISCORD_CLIENT_SECRET || '',

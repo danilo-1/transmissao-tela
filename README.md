@@ -47,9 +47,11 @@ npm run test:e2e   # transmissão real entre dois Chromium (precisa do Playwrigh
 
 ### Primeiro deploy no Render
 
-1. Em https://render.com, **New > Blueprint** e escolha este repositório (ele lê o `render.yaml`).
-2. Preencha `BASE_URL` (a URL que o Render der, ex. `https://transmissao-tela.onrender.com`) e as chaves do Discord.
-3. No Discord Developer Portal, adicione `<BASE_URL>/auth/callback` nos Redirects.
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/danilo-1/transmissao-tela)
+
+1. Clique no botão acima (ou **New > Blueprint** no Render e escolha este repositório). Ele lê o `render.yaml`.
+2. As chaves do Discord podem ficar vazias no começo: o app sobe em modo de teste (login só com nome).
+3. Para ligar o Discord, preencha as chaves e adicione `<URL do Render>/auth/callback` nos Redirects do Discord Developer Portal.
 4. No Render, copie o **Deploy Hook** do serviço e salve no GitHub como secret `RENDER_DEPLOY_HOOK_URL` no environment `production`.
 
 Detalhes do fluxo de trabalho em [CONTRIBUTING.md](CONTRIBUTING.md).
