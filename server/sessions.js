@@ -22,18 +22,27 @@ export function parseCookies(header = '') {
   );
 }
 
-export function createSession(res, user) {
+// Cria a sessão e devolve o token assinado (usado no cookie ou, dentro do Discord, no lugar dele).
+export function createSessionToken(user) {
   const id = crypto.randomBytes(24).toString('base64url');
   sessions.set(id, { user, expires: Date.now() + MAX_AGE_MS });
+  return `${id}.${sign(id)}`;
+}
+
+export function createSession(res, user) {
+  const token = createSessionToken(user);
   const secure = config.baseUrl.startsWith('https://') ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
-    `${COOKIE}=${id}.${sign(id)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${MAX_AGE_MS / 1000}${secure}`,
+    `${COOKIE}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${MAX_AGE_MS / 1000}${secure}`,
   );
 }
 
 export function getUser(cookieHeader) {
-  const raw = parseCookies(cookieHeader)[COOKIE];
+  return getUserByToken(parseCookies(cookieHeader)[COOKIE]);
+}
+
+export function getUserByToken(raw) {
   if (!raw) return null;
   const [id, mac] = raw.split('.');
   if (!id || !mac || mac.length !== sign(id).length) return null;

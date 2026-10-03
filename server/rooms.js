@@ -32,6 +32,12 @@ export function canWatch(room, user) {
   return user.guilds.some((g) => g.id === room.guild.id);
 }
 
+// Salas ao vivo cujo host está na mesma call (canal de voz) que o espectador da Atividade.
+export function roomsForCall(guildId, voiceUserIds) {
+  const inCall = new Set(voiceUserIds);
+  return [...rooms.values()].filter((r) => r.hostSocket && r.guild.id === guildId && inCall.has(r.host.id));
+}
+
 export function publicRoom(room) {
   return {
     id: room.id,

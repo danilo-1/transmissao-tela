@@ -23,6 +23,17 @@ Sem `DISCORD_CLIENT_ID` no `.env`, o app roda em **modo de teste**: o login pede
 
 O login pede os escopos `identify` (nome e avatar) e `guilds` (lista de servidores, para checar quem pode assistir).
 
+## Assistir dentro da call (Atividade do Discord)
+
+Quem transmite continua usando o site. Os amigos podem assistir **dentro da call**, pelo botão de Atividades (foguete), sem abrir link. O Discord informa quem está na call, então só aparece a transmissão de quem está nela.
+
+Para ligar, no [Discord Developer Portal](https://discord.com/developers/applications), no mesmo app do login:
+
+1. **Activities > URL Mappings**: em _Root Mapping_ (`/`), coloque `transmissao-tela.onrender.com` (sem `https://`).
+2. **Activities > Settings**: marque **Enable Activities**. Em _Supported Platforms_, deixe **Web** (desktop) ligado.
+3. **Installation**: deixe **Guild Install** ligado e use o _Install Link_ para adicionar o app ao seu servidor.
+4. Numa call do servidor, clique no foguete (Atividades) e escolha o app.
+
 ## Como funciona
 
 - `server/auth.js`: login com Discord (OAuth2) e o login de teste.

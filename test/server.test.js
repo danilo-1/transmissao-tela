@@ -4,6 +4,7 @@ import http from 'node:http';
 import { WebSocket } from 'ws';
 import { createApp } from '../server/index.js';
 import { attachSignaling } from '../server/signaling.js';
+import { createSessionToken } from '../server/sessions.js';
 
 let server;
 let wss;
@@ -98,4 +99,39 @@ test('next do login não aceita domínio externo', async () => {
     redirect: 'manual',
   });
   assert.equal(res.headers.get('location'), '/');
+});
+
+test('Atividade: acha a sala de quem está na mesma call e conecta com token', async () => {
+  const hostCookie = await login('Host da call');
+  const room = await fetch(`${base}/api/rooms`, {
+    method: 'POST',
+    headers: { cookie: hostCookie, 'content-type': 'application/json' },
+    body: JSON.stringify({ guildId: 'dev' }),
+  }).then((r) => r.json());
+  const host = openWs(room.id, hostCookie);
+  await host.next('hello');
+  const hostId = (await fetch(`${base}/api/me`, { headers: { cookie: hostCookie } }).then((r) => r.json())).user.id;
+
+  const token = createSessionToken({ id: 'amigo-1', name: 'Amigo', avatar: '', guilds: [{ id: 'dev', name: 'x' }] });
+  const ask = (voiceUserIds) =>
+    fetch(`${base}/api/activity/rooms`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ guildId: 'dev', voiceUserIds }),
+    });
+
+  const found = await ask(['amigo-1', hostId]).then((r) => r.json());
+  assert.deepEqual(
+    found.rooms.map((r) => r.id),
+    [room.id],
+  );
+  assert.equal((await ask(['amigo-1'])).status, 200);
+  assert.deepEqual((await ask(['amigo-1']).then((r) => r.json())).rooms, []);
+  assert.equal((await ask([hostId])).status, 403);
+
+  const viewer = new WebSocket(`${base.replace('http', 'ws')}/ws?room=${room.id}&token=${token}`);
+  const joined = await host.next('viewer-joined');
+  assert.equal(joined.user.name, 'Amigo');
+  viewer.close();
+  host.ws.close();
 });

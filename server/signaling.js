@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { WebSocketServer } from 'ws';
-import { getUser } from './sessions.js';
+import { getUser, getUserByToken } from './sessions.js';
 import { getRoom, deleteRoom, canWatch } from './rooms.js';
 
 const send = (ws, msg) => ws.readyState === ws.OPEN && ws.send(JSON.stringify(msg));
@@ -14,8 +14,10 @@ export function attachSignaling(server) {
   const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 64 * 1024 });
 
   wss.on('connection', (ws, req) => {
-    const user = getUser(req.headers.cookie);
-    const roomId = new URL(req.url, 'http://x').searchParams.get('room');
+    const params = new URL(req.url, 'http://x').searchParams;
+    // Na Atividade do Discord não há cookie: a sessão vem como ?token=.
+    const user = params.get('token') ? getUserByToken(params.get('token')) : getUser(req.headers.cookie);
+    const roomId = params.get('room');
     const room = roomId && getRoom(roomId);
 
     if (!user) return ws.close(4401, 'login necessário');
