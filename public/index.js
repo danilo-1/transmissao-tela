@@ -1,0 +1,27 @@
+const $ = (id) => document.getElementById(id);
+
+const res = await fetch('/api/me');
+if (res.status === 401) {
+  $('logged-out').classList.remove('hidden');
+} else {
+  const { user } = await res.json();
+  $('me').innerHTML = '';
+  const img = Object.assign(document.createElement('img'), { src: user.avatar, alt: '' });
+  $('me').append(img, document.createTextNode(user.name));
+  $('me').classList.remove('hidden');
+
+  for (const g of user.guilds) $('guild').append(new Option(g.name, g.id));
+  $('logged-in').classList.remove('hidden');
+
+  $('create').onclick = async () => {
+    $('error').textContent = '';
+    const r = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guildId: $('guild').value }),
+    });
+    const body = await r.json();
+    if (!r.ok) return ($('error').textContent = body.error);
+    location.href = `/s/${body.id}`;
+  };
+}

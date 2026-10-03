@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sala de transmissão</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1 id="title">Carregando…</h1>
+      <span id="badge" class="badge">offline</span>
+      <span id="guild" class="muted"></span>
+    </div>
+    <a href="/" class="muted">Início</a>
+  </header>
+
+  <p id="error" class="error"></p>
+  <a id="login" class="button hidden" href="#">Entrar com Discord</a>
+
+  <section id="stage" class="hidden">
+    <div class="panel">
+      <video id="video" autoplay playsinline muted></video>
+      <p id="status" class="muted"></p>
+      <div class="row">
+        <button id="share" class="hidden">Compartilhar tela</button>
+        <button id="stop" class="danger hidden">Parar de compartilhar</button>
+        <button id="end" class="secondary hidden">Encerrar sala</button>
+        <button id="unmute" class="secondary hidden">Ativar som</button>
+        <button id="fullscreen" class="secondary">Tela cheia</button>
+      </div>
+    </div>
+
+    <div id="host-panel" class="panel hidden">
+      <h2>Convide seus amigos</h2>
+      <p class="muted">Mande este link no chat da call. Eles entram com a conta do Discord.</p>
+      <div class="row">
+        <span id="link" class="link"></span>
+        <button id="copy" class="secondary">Copiar</button>
+      </div>
+      <h3>Assistindo (<span id="count">0</span>)</h3>
+      <ul id="viewers" class="viewers"></ul>
+    </div>
+  </section>
+</main>
+<script type="module" src="/room.js"></script>
+</body>
+</html>
